@@ -1,7 +1,7 @@
 import random
 import copy
 import math
-from Kalah import make_move
+from Kalah import make_move, check_endgame
 
 def get_ai_move(board):
     """
@@ -34,6 +34,8 @@ def minimax(board, depth, is_maximizing):
     The recursive Minimax algorithm with Alpha-Beta Pruning.
     """
     # 1. Base case: If depth is 0 or the game is over, return the board evaluation and no move.
+    if depth == 0 or check_endgame(board):
+        return score(board), None
     
     if is_maximizing: # AI's turn
         # 2. Setup max_eval to -infinity
