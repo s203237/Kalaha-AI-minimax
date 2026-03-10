@@ -1,152 +1,188 @@
-import random
-import copy
+"""
+Adversarial Search Algorithms.
+
+Contains the AI logic for the Kalah game. Includes the Minimax algorithm 
+with Iterative Deepening to support time-limited queries, alongside 
+comprehensive performance tracking (nodes expanded, time taken).
+"""
+
 import math
+import time
+from kalah_engine import make_move, get_valid_moves, check_endgame
 
-
-def get_ai_move(board):
-    """
-    Determine the AI's next move.
-    
-    The board is a 14-element list:
-    - Indices 0-5: Human player's pits (left to right)
-    - Index 6: Human player's store (Mancala)
-    - Indices 7-12: AI's pits (right to left from the AI's perspective)
-    - Index 13: AI's store (Mancala)
-    
-    Returns:
-        int: The index of the pit the AI chooses to play (must be between 7 and 12).
-    """
-    # TODO: Implement your AI logic here
-    return random.randint(7, 12)
-    depth = 5
+class SearchTimeout(Exception):
+    """Custom exception raised when the AI search exceeds the allotted time."""
     pass
 
-def score(board):
-    # Calculate the score difference (AI's score - Player's score)
-    return board[13] - board[6]
 
-def valid_moves(board):
-    # Return a list of non-empty pits to help the AI choose a valid move
-    return [i for i in range(7, 13) if board[i] > 0]
-
-def check_endgame(board):
-    p1_empty = all(s == 0 for s in board[0:6])
-    p2_empty = all(s == 0 for s in board[7:13])
-
-    if p1_empty or p2_empty:
-        # Sweep remaining seeds to the respective stores
-        board[6] += sum(board[0:6])
-        board[13] += sum(board[7:13])
-        
-        # Empty the pits
-        for i in range(6): 
-            board[i] = 0
-        for i in range(7, 13): 
-            board[i] = 0
-            
-        return True
-    return False
-
-
-def make_move(board, player, pit):
-    seeds = board[pit]
-    board[pit] = 0
-    current_pit = pit
-
-    # Distribute the seeds
-    while seeds > 0:
-        current_pit = (current_pit + 1) % 14
-        
-        # Skip the opponent's store
-        if player == 1 and current_pit == 13:
-            continue
-        if player == 2 and current_pit == 6:
-            continue
-
-        board[current_pit] += 1
-        seeds -= 1
-
-    extra_turn = False
+def evaluate_board(board, ai_player_id):
+    """
+    Heuristic evaluation function (EVAL).
     
-    # Check for an extra turn
-    if player == 1 and current_pit == 6:
-        extra_turn = True
-    elif player == 2 and current_pit == 13:
-        extra_turn = True
-
-    # Check for capture
-    if board[current_pit] == 1:
-        # Opposite pit math: opposite of i is 12 - i
-        opposite_pit = 12 - current_pit 
+    Calculates the relative advantage of the AI player over its opponent.
+    This simple heuristic looks purely at the material advantage (score difference).
+    
+    Args:
+        board (list of int): The current board state.
+        ai_player_id (int): The ID of the AI player (1 or 2).
         
-        # Human capture
-        if player == 1 and 0 <= current_pit <= 5:
-            if board[opposite_pit] > 0:
-                board[6] += board[current_pit] + board[opposite_pit]
-                board[current_pit] = 0
-                board[opposite_pit] = 0
-                print("\n*** Human captures seeds! ***")
+    Returns:
+        int: The heuristic value of the board. Positive implies an AI advantage.
+    """
+    if ai_player_id == 1:
+        return board[6] - board[13]
+    else:
+        return board[13] - board[6]
+
+
+def get_ai_move_minimax(board, ai_player_id, depth=None, time_limit=None):
+    """
+    Wrapper function to initiate the Minimax search.
+    Supports either fixed-depth search or time-limited search using Iterative Deepening.
+    
+    Args:
+        board (list of int): The current board state.
+        ai_player_id (int): The ID of the AI player.
+        depth (int, optional): The fixed depth to search.
+        time_limit (float, optional): The maximum time in seconds allowed for the search.
+        
+    Returns:
+        tuple: (best_move, stats_dictionary)
+    """
+    stats = {'nodes': 0, 'depth_reached': 0, 'time_taken': 0.0}
+    start_time = time.time()
+    best_move = None
+    
+    # Fallback move in case time expires before even depth 1 finishes
+    valid_moves = get_valid_moves(board, ai_player_id)
+    if not valid_moves:
+        return None, stats
+    best_move = valid_moves[0] 
+
+    if time_limit is not None:
+        # --- Iterative Deepening Search (Time-based) ---
+        current_depth = 1
+        previous_iteration_nodes = 0
+        
+        try:
+            while True:
+                # Keep track of nodes expanded before this depth iteration begins
+                nodes_before = stats['nodes']
                 
-        # AI capture
-        elif player == 2 and 7 <= current_pit <= 12:
-            if board[opposite_pit] > 0:
-                board[13] += board[current_pit] + board[opposite_pit]
-                board[current_pit] = 0
-                board[opposite_pit] = 0
-                print("\n*** AI captures seeds! ***")
-
-    return board, extra_turn
-
-def check_endgame(board):
-    p1_empty = all(s == 0 for s in board[0:6])
-    p2_empty = all(s == 0 for s in board[7:13])
-
-    if p1_empty or p2_empty:
-        # Sweep remaining seeds to the respective stores
-        board[6] += sum(board[0:6])
-        board[13] += sum(board[7:13])
-        
-        # Empty the pits
-        for i in range(6): 
-            board[i] = 0
-        for i in range(7, 13): 
-            board[i] = 0
+                score, move = minimax(
+                    board, current_depth, True, ai_player_id, 
+                    stats, start_time, time_limit
+                )
+                
+                if move is not None:
+                    best_move = move
+                stats['depth_reached'] = current_depth
+                
+                # Calculate how many nodes were expanded during this specific depth level
+                nodes_this_iteration = stats['nodes'] - nodes_before
+                
+                # SMART BREAK: Prevent the "End-Game Spin"
+                # If the tree didn't grow compared to the last depth iteration, it means 
+                # all branches hit a terminal state (Game Over) naturally. 
+                # Further deepening is useless.
+                if nodes_this_iteration == previous_iteration_nodes:
+                    break
+                    
+                previous_iteration_nodes = nodes_this_iteration
+                current_depth += 1
+                
+        except SearchTimeout:
+            # Time limit exceeded. We safely catch the exception and return the 
+            # best_move found from the last fully completed depth.
+            pass
             
-        return True
-    return False
+    else:
+        # --- Fixed Depth Search ---
+        # If no depth is provided and no time limit, default to a safe depth of 4
+        search_depth = depth if depth is not None else 4
+        score, move = minimax(
+            board, search_depth, True, ai_player_id, 
+            stats, start_time, None
+        )
+        if move is not None:
+            best_move = move
+        stats['depth_reached'] = search_depth
 
-def minimax(board, depth, is_maximizing):
+    stats['time_taken'] = time.time() - start_time
+    return best_move, stats
+
+
+def minimax(board, depth, is_maximizing, ai_player_id, stats, start_time, time_limit):
     """
-    The recursive Minimax algorithm with Alpha-Beta Pruning.
-    """
-    # 1. Base case: If depth is 0 or the game is over, return the board evaluation and no move.
-    if depth == 0 or check_endgame(board):
-        return score(board), None
+    Recursive Minimax algorithm.
     
-    if is_maximizing: # AI's turn
-        # 2. Setup max_eval to -infinity
-        # 3. Loop through all valid AI moves:
-            # a. Create a deepcopy of the board.
-            # b. Simulate the move on the copied board.
-            # c. Determine if the AI gets an extra turn.
-            # d. Recursively call minimax() with the new board.
-                # * If extra turn: is_maximizing remains True.
-                # * If normal turn: is_maximizing becomes False.
-            # e. Update max_eval and alpha.
-            # f. If beta <= alpha, break (Prune).
-        # 4. Return the best evaluation and the best move.
-        pass
+    Includes node counting for benchmarking and time-checking. If the time limit 
+    is reached during traversal, it raises a SearchTimeout to instantly collapse 
+    the search tree and halt execution.
+    """
+    # Increment node counter for performance metrics
+    stats['nodes'] += 1
+    
+    # Check for timeout and abort if necessary
+    if time_limit is not None and (time.time() - start_time) >= time_limit:
+        raise SearchTimeout()
+
+    # Create an independent copy of the board to prevent mutation during endgame checks
+    board_for_check = board.copy()
+    
+    # Base case: Cutoff depth reached or terminal state encountered
+    if depth == 0 or check_endgame(board_for_check):
+        return evaluate_board(board_for_check, ai_player_id), None
+
+    # Determine whose turn it is currently
+    current_player = ai_player_id if is_maximizing else (1 if ai_player_id == 2 else 2)
         
-    else: # Human's turn (Minimizing)
-        # 5. Setup min_eval to +infinity
-        # 6. Loop through all valid Human moves:
-            # a. Create a deepcopy of the board.
-            # b. Simulate the move.
-            # c. Determine if Human gets an extra turn.
-            # d. Recursively call minimax().
-                # * If extra turn: is_maximizing remains False.
-                # * If normal turn: is_maximizing becomes True.
-            # e. Update min_eval and beta.
-            # f. If beta <= alpha, break (Prune).
-        # 7. Return the best evaluation and the best move.
-        pass
+    if is_maximizing:
+        # --- Maximizing Player (AI) ---
+        max_eval = -math.inf
+        best_move = None
+        
+        possible_moves = get_valid_moves(board, player=current_player)
+        
+        if not possible_moves:
+            return evaluate_board(board_for_check, ai_player_id), None
+            
+        for move in possible_moves:
+            board_copy = board.copy()
+            new_board, extra_turn = make_move(board_copy, player=current_player, pit=move, verbose=False)
+            
+            # Kalah rule: If an extra turn is granted, the turn does NOT switch
+            next_is_maximizing = True if extra_turn else False
+            
+            eval_score, _ = minimax(new_board, depth - 1, next_is_maximizing, ai_player_id, stats, start_time, time_limit)
+            
+            if eval_score > max_eval:
+                max_eval = eval_score
+                best_move = move
+                
+        return max_eval, best_move
+        
+    else:
+        # --- Minimizing Player (Opponent) ---
+        min_eval = math.inf
+        best_move = None
+        
+        possible_moves = get_valid_moves(board, player=current_player)
+        
+        if not possible_moves:
+            return evaluate_board(board_for_check, ai_player_id), None
+            
+        for move in possible_moves:
+            board_copy = board.copy()
+            new_board, extra_turn = make_move(board_copy, player=current_player, pit=move, verbose=False)
+            
+            # Kalah rule: If an extra turn is granted, the turn does NOT switch
+            next_is_maximizing = False if extra_turn else True
+            
+            eval_score, _ = minimax(new_board, depth - 1, next_is_maximizing, ai_player_id, stats, start_time, time_limit)
+            
+            if eval_score < min_eval:
+                min_eval = eval_score
+                best_move = move
+                
+        return min_eval, best_move
