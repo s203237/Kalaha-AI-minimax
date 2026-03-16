@@ -8,7 +8,26 @@ launching the game loop.
 """
 
 from kalah_engine import display_board, make_move, check_endgame
-from players import create_human_player, create_random_ai_player, create_minimax_player
+from players import (
+    create_human_player,
+    create_random_ai_player,
+    create_minimax_player,
+    create_alphabeta_player,
+)
+
+
+def choose_eval_mode():
+    """Prompts the user to choose which heuristic evaluator an AI should use."""
+    print("\nSelect evaluation function:")
+    print("1. Simple (store difference only)")
+    print("2. Phase-aware (store + mobility + tactical features)")
+    eval_choice = input("Select evaluation function (1-2): ").strip()
+
+    if eval_choice == '2':
+        return "phase_aware"
+    if eval_choice != '1':
+        print("Invalid choice. Defaulting to Simple evaluation.")
+    return "simple"
 
 
 def setup_player(player_id):
@@ -25,9 +44,10 @@ def setup_player(player_id):
     print("1. Human")
     print("2. Random AI (Baseline)")
     print("3. Minimax AI")
+    print("4. Alpha-Beta AI")
     
     while True:
-        choice = input("Select player type (1-3): ").strip()
+        choice = input("Select player type (1-4): ").strip()
         
         if choice == '1':
             return create_human_player()
@@ -40,22 +60,48 @@ def setup_player(player_id):
             print("1. Fixed Depth (e.g., consistently look X moves ahead)")
             print("2. Time Limit (Iterative Deepening for X seconds)")
             limit_choice = input("Select constraint type (1-2): ").strip()
+            eval_mode = choose_eval_mode()
             
             if limit_choice == '1':
                 try:
                     depth = int(input("Enter search depth (e.g., 6): ").strip())
-                    return create_minimax_player(depth=depth)
+                    return create_minimax_player(depth=depth, eval_mode=eval_mode)
                 except ValueError:
                     print("Invalid input. Defaulting to depth 6.")
-                    return create_minimax_player(depth=6)
+                    return create_minimax_player(depth=6, eval_mode=eval_mode)
                     
             elif limit_choice == '2':
                 try:
                     time_limit = float(input("Enter time limit in seconds (e.g., 1.5): ").strip())
-                    return create_minimax_player(time_limit=time_limit)
+                    return create_minimax_player(time_limit=time_limit, eval_mode=eval_mode)
                 except ValueError:
                     print("Invalid input. Defaulting to 1.0 seconds.")
-                    return create_minimax_player(time_limit=1.0)
+                    return create_minimax_player(time_limit=1.0, eval_mode=eval_mode)
+            else:
+                print("Invalid constraint type. Try again.")
+
+        elif choice == '4':
+            print("\nConfigure Alpha-Beta AI:")
+            print("1. Fixed Depth (e.g., consistently look X moves ahead)")
+            print("2. Time Limit (Iterative Deepening for X seconds)")
+            limit_choice = input("Select constraint type (1-2): ").strip()
+            eval_mode = choose_eval_mode()
+
+            if limit_choice == '1':
+                try:
+                    depth = int(input("Enter search depth (e.g., 6): ").strip())
+                    return create_alphabeta_player(depth=depth, eval_mode=eval_mode)
+                except ValueError:
+                    print("Invalid input. Defaulting to depth 6.")
+                    return create_alphabeta_player(depth=6, eval_mode=eval_mode)
+
+            elif limit_choice == '2':
+                try:
+                    time_limit = float(input("Enter time limit in seconds (e.g., 1.5): ").strip())
+                    return create_alphabeta_player(time_limit=time_limit, eval_mode=eval_mode)
+                except ValueError:
+                    print("Invalid input. Defaulting to 1.0 seconds.")
+                    return create_alphabeta_player(time_limit=1.0, eval_mode=eval_mode)
             else:
                 print("Invalid constraint type. Try again.")
                 
