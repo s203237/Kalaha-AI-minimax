@@ -7,13 +7,16 @@ and configure AI parameters (depth vs. time limits) via a CLI menu before
 launching the game loop.
 """
 
-from visual import run_game
+from kalah_engine import display_board, make_move, check_endgame
 from players import (
     create_human_player,
     create_random_ai_player,
     create_minimax_player,
     create_alphabeta_player,
 )
+
+# Single-line toggle: set to False to run without the visual window.
+VISUAL_MODE = True
 
 
 def choose_eval_mode():
@@ -121,10 +124,52 @@ def play_interactive_game():
     # 1. Setup Phase: Interactively construct both players
     p1 = setup_player(1)
     p2 = setup_player(2)
-    
-    # 2. Launch merged visual+gameplay loop
+
+    # 2. Launch selected loop (visual or terminal)
     print("\nStarting the match...\n")
-    run_game(p1, p2, show_console=True)
+    if VISUAL_MODE:
+        from visual import run_game
+
+        run_game(p1, p2, show_console=True)
+        return
+
+    board = [4] * 6 + [0] + [4] * 6 + [0]
+    current_player = 1
+
+    while not check_endgame(board):
+        display_board(board)
+        print(f"--- Player {current_player}'s Turn ---")
+
+        active_player = p1 if current_player == 1 else p2
+        pit, stats = active_player(board, current_player)
+
+        if stats and 'time_taken' in stats:
+            print(
+                f"> AI evaluated {stats.get('nodes', 0)} nodes to depth "
+                f"{stats.get('depth_reached', 0)} in {stats.get('time_taken', 0):.3f} seconds."
+            )
+
+        board, extra_turn = make_move(board, current_player, pit, verbose=True)
+
+        if extra_turn:
+            print(f"\n*** Player {current_player} gets an extra turn! ***")
+        else:
+            current_player = 2 if current_player == 1 else 1
+
+    display_board(board)
+    print("========================================")
+    print("               GAME OVER                ")
+    print("========================================")
+    print(f"Player 1 Final Score: {board[6]}")
+    print(f"Player 2 Final Score: {board[13]}")
+    print("----------------------------------------")
+
+    if board[6] > board[13]:
+        print("Result: Player 1 wins!")
+    elif board[13] > board[6]:
+        print("Result: Player 2 wins!")
+    else:
+        print("Result: It's a draw!")
 
 
 if __name__ == "__main__":

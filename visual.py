@@ -1,14 +1,11 @@
 import pygame
 from kalah_engine import make_move, check_endgame
 
-pygame.init()
-
 WIDTH = 900
 HEIGHT = 700
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Kalah Game")
-font = pygame.font.SysFont(None, 30)
+screen = None
+font = None
 
 
 board = [4] * 6 + [0] + [4] * 6 + [0]
@@ -19,6 +16,18 @@ STORE_WIDTH = 80
 STORE_HEIGHT = 200
 CENTER_X = WIDTH // 2
 CENTER_Y = HEIGHT // 2
+
+
+def _ensure_visual_context():
+    """Initializes pygame and rendering objects only when visual mode is used."""
+    global screen, font
+    if screen is not None and font is not None:
+        return
+
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Kalah Game")
+    font = pygame.font.SysFont(None, 30)
 
 def draw_board(board):
     screen.fill((200, 180, 140))
@@ -91,6 +100,8 @@ def run_game(player1, player2, show_console=True):
         player2 (callable): Function(board, player_id) -> (pit, stats)
         show_console (bool): Print turn and stats to terminal when True.
     """
+    _ensure_visual_context()
+
     board = [4] * 6 + [0] + [4] * 6 + [0]
     current_player = 1
     running = True
