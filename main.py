@@ -8,6 +8,7 @@ launching the game loop.
 """
 
 from kalah_engine import display_board, make_move, check_endgame
+from visual import run_game
 from players import (
     create_human_player,
     create_random_ai_player,
@@ -180,7 +181,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Graceful exit if the user presses Ctrl+C
         print("\n\nGame terminated by user. Goodbye!")
-from visual import run_game
-
-if __name__ == "__main__":
-    run_game()

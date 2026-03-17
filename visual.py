@@ -1,5 +1,5 @@
 import pygame
-from AI import get_ai_move
+from ai import get_ai_move
 from kalah_engine import make_move, check_endgame
 
 pygame.init()
