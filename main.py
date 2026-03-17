@@ -7,7 +7,6 @@ and configure AI parameters (depth vs. time limits) via a CLI menu before
 launching the game loop.
 """
 
-from kalah_engine import display_board, make_move, check_endgame
 from visual import run_game
 from players import (
     create_human_player,
@@ -123,55 +122,9 @@ def play_interactive_game():
     p1 = setup_player(1)
     p2 = setup_player(2)
     
-    # 2. Initialization: 4 seeds per pit, 0 in both stores
-    board = [4] * 6 + [0] + [4] * 6 + [0]
-    current_player = 1 
-
+    # 2. Launch merged visual+gameplay loop
     print("\nStarting the match...\n")
-    
-    # 3. Core Execution Loop
-    while not check_endgame(board):
-        display_board(board)
-        
-        print(f"--- Player {current_player}'s Turn ---")
-        
-        # Fetch the decision and runtime statistics from the active agent
-        if current_player == 1:
-            pit, stats = p1(board, current_player)
-        else:
-            pit, stats = p2(board, current_player)
-            
-        # Optional: Print AI performance metrics if the agent returned any
-        if stats and 'time_taken' in stats:
-            print(f"> AI evaluated {stats.get('nodes', 0)} nodes to depth {stats.get('depth_reached', 0)} "
-                  f"in {stats.get('time_taken', 0):.3f} seconds.")
-            
-        # Execute the transition model (RESULT function)
-        # verbose=True enables the engine to print capture notifications
-        board, extra_turn = make_move(board, current_player, pit, verbose=True)
-
-        # Evaluate Kalah continuation rule (landing in own store grants another turn)
-        if extra_turn:
-            print(f"\n*** Player {current_player} gets an extra turn! ***")
-        else:
-            # Transfer control to the opponent
-            current_player = 2 if current_player == 1 else 1
-
-    # 4. Terminal State Resolution
-    display_board(board)
-    print("========================================")
-    print("               GAME OVER                ")
-    print("========================================")
-    print(f"Player 1 Final Score: {board[6]}")
-    print(f"Player 2 Final Score: {board[13]}")
-    print("----------------------------------------")
-    
-    if board[6] > board[13]:
-        print("🏆 Result: Player 1 wins!")
-    elif board[13] > board[6]:
-        print("🏆 Result: Player 2 wins!")
-    else:
-        print("🤝 Result: It's a draw!")
+    run_game(p1, p2, show_console=True)
 
 
 if __name__ == "__main__":
