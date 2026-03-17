@@ -38,8 +38,6 @@ def draw_board(board):
     human_text = font.render("Human Player", True, (0,0,0))
     screen.blit(human_text, (CENTER_X-50, CENTER_Y+220))
     
-    text = font.render("Game Over", True, (0,0,0))
-    screen.blit(text, (CENTER_X-120, CENTER_Y))
     
      #player pits
     for i in range(6):
