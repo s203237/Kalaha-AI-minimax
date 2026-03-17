@@ -8,7 +8,7 @@ Each player function takes the board and player_id, and returns a tuple:
 
 import random
 from kalah_engine import get_valid_moves
-from ai import get_ai_move_minimax, get_ai_move_alphabeta
+from AI import get_ai_move_minimax, get_ai_move_alphabeta
 
 def create_human_player():
     """Factory for a human CLI player."""
