@@ -7,7 +7,4 @@ The pygame module is used for the visual implementation.
 
 To run the program, simply run the main.py file and keep the rest of the files inside the same folder as main.py. 
 
-The visual component can be turned off to use the terminal to play the game instead. 
-The is done by changing VISUAL_MODE = True to VISUAL_MODE = False on line 19 in main.py
-
 

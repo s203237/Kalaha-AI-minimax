@@ -7,9 +7,6 @@ and configure AI parameters (depth vs. time limits) via a CLI menu before
 launching the game loop.
 """
 
-
-
-VISUAL_MODE = True
 from visual import menu_screen, create_player_from_config, run_game
 
 if __name__ == "__main__":
