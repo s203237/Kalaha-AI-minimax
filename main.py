@@ -7,6 +7,7 @@ and configure AI parameters (depth vs. time limits) via a CLI menu before
 launching the game loop.
 """
 
+from visual import menu_screen, create_player_from_config, run_game
 from kalah_engine import display_board, make_move, check_endgame
 from players import (
     create_human_player,
@@ -14,9 +15,6 @@ from players import (
     create_minimax_player,
     create_alphabeta_player,
 )
-
-# Single-line toggle: set to False to run without the visual window.
-VISUAL_MODE = True
 
 
 def choose_eval_mode():
@@ -113,49 +111,47 @@ def setup_player(player_id):
 
 
 def play_interactive_game():
-    """
-    Main game loop orchestrator with visual terminal output.
-    Hooks up the configured players to the game engine and manages turn state.
-    """
-    print("========================================")
-    print("          WELCOME TO KALAH AI           ")
-    print("========================================")
+
     
     # 1. Setup Phase: Interactively construct both players
     p1 = setup_player(1)
     p2 = setup_player(2)
-
-    # 2. Launch selected loop (visual or terminal)
-    print("\nStarting the match...\n")
-    if VISUAL_MODE:
-        from visual import run_game
-
-        run_game(p1, p2, show_console=True)
-        return
-
+    
+    # 2. Initialization: 4 seeds per pit, 0 in both stores
     board = [4] * 6 + [0] + [4] * 6 + [0]
-    current_player = 1
+    current_player = 1 
 
+    print("\nStarting the match...\n")
+    
+    # 3. Core Execution Loop
     while not check_endgame(board):
         display_board(board)
+        
         print(f"--- Player {current_player}'s Turn ---")
-
-        active_player = p1 if current_player == 1 else p2
-        pit, stats = active_player(board, current_player)
-
+        
+        # Fetch the decision and runtime statistics from the active agent
+        if current_player == 1:
+            pit, stats = p1(board, current_player)
+        else:
+            pit, stats = p2(board, current_player)
+            
+        # Optional: Print AI performance metrics if the agent returned any
         if stats and 'time_taken' in stats:
-            print(
-                f"> AI evaluated {stats.get('nodes', 0)} nodes to depth "
-                f"{stats.get('depth_reached', 0)} in {stats.get('time_taken', 0):.3f} seconds."
-            )
-
+            print(f"> AI evaluated {stats.get('nodes', 0)} nodes to depth {stats.get('depth_reached', 0)} "
+                  f"in {stats.get('time_taken', 0):.3f} seconds.")
+            
+        # Execute the transition model (RESULT function)
+        # verbose=True enables the engine to print capture notifications
         board, extra_turn = make_move(board, current_player, pit, verbose=True)
 
+        # Evaluate Kalah continuation rule (landing in own store grants another turn)
         if extra_turn:
             print(f"\n*** Player {current_player} gets an extra turn! ***")
         else:
+            # Transfer control to the opponent
             current_player = 2 if current_player == 1 else 1
 
+    # 4. Terminal State Resolution
     display_board(board)
     print("========================================")
     print("               GAME OVER                ")
@@ -163,19 +159,48 @@ def play_interactive_game():
     print(f"Player 1 Final Score: {board[6]}")
     print(f"Player 2 Final Score: {board[13]}")
     print("----------------------------------------")
-
+    
     if board[6] > board[13]:
-        print("Result: Player 1 wins!")
+        print("🏆 Result: Player 1 wins!")
     elif board[13] > board[6]:
-        print("Result: Player 2 wins!")
+        print("🏆 Result: Player 2 wins!")
     else:
-        print("Result: It's a draw!")
+        print("🤝 Result: It's a draw!")
 
 
 if __name__ == "__main__":
-    # Launch the interactive game setup
-    try:
-        play_interactive_game()
-    except KeyboardInterrupt:
-        # Graceful exit if the user presses Ctrl+C
-        print("\n\nGame terminated by user. Goodbye!")
+
+    """
+    Main game loop orchestrator with visual terminal output.
+    Hooks up the configured players to the game engine and manages turn state.
+    """
+    print("========================================")
+    print("          WELCOME TO KALAH AI           ")
+    print("========================================")
+
+    choice = input("Select CLI Mode (1) or Visual Mode (2):").strip()
+    
+    if choice == '1':
+        # Launch the interactive game setup
+        try:
+            play_interactive_game()
+        except KeyboardInterrupt:
+            # Graceful exit if the user presses Ctrl+C
+            print("\n\nGame terminated by user. Goodbye!")
+
+        
+    elif choice == '2':
+        p1_config, p2_config = menu_screen()
+
+        if p1_config is None or p2_config is None:
+            raise SystemExit
+
+        player1 = create_player_from_config(p1_config)
+        player2 = create_player_from_config(p2_config)
+
+        run_game(player1, player2, p1_config, p2_config)
+
+    else:
+        print("Invalid mode selection. Exiting.")
+        
+

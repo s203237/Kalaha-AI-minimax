@@ -1,0 +1,34 @@
+group,config_a,config_b,wdl_a,avg_margin,first_mover_dominance,median_depth_a,median_depth_b,mode_depth_a,mode_depth_b,q3_depth_a,q3_depth_b,nodes_sec_a,nodes_sec_b,avg_time_a,avg_time_b
+"GROUP 1  -  Minimax vs Minimax  (simple eval, fixed depth)","MM-d4","MM-d6","1/0/1",-8.0,yes,4.00,6.00,4,6,4.00,6.00,1284458,1352495,0.0004,0.0060
+"GROUP 1  -  Minimax vs Minimax  (simple eval, fixed depth)","MM-d5","MM-d7","1/0/1",-10.0,yes,5.00,7.00,5,7,5.00,7.00,1338800,1333974,0.0013,0.0270
+"GROUP 1  -  Minimax vs Minimax  (simple eval, fixed depth)","MM-d6","MM-d7","1/0/1",2.0,yes,6.00,7.00,6,7,6.00,7.00,1315339,1318997,0.0057,0.0218
+"GROUP 2  -  Alpha-Beta vs Alpha-Beta  (simple eval, fixed depth)","AB-d7","AB-d11","0/0/2",-17.0,no,7.00,11.00,7,11,7.00,11.00,605048,632081,0.0025,0.1091
+"GROUP 2  -  Alpha-Beta vs Alpha-Beta  (simple eval, fixed depth)","AB-d9","AB-d11","0/0/2",-12.0,no,9.00,11.00,9,11,9.00,11.00,610447,623453,0.0115,0.0563
+"GROUP 2  -  Alpha-Beta vs Alpha-Beta  (simple eval, fixed depth)","AB-d11","AB-d13","1/0/1",-7.0,yes,11.00,13.00,11,13,11.00,13.00,626498,627097,0.0607,0.3057
+"GROUP 2  -  Alpha-Beta vs Alpha-Beta  (simple eval, fixed depth)","AB-d9","AB-d13","0/0/2",-16.0,no,9.00,13.00,9,13,9.00,13.00,610002,613814,0.0184,0.5017
+"GROUP 3  -  Minimax vs Alpha-Beta  (depth=7, simple eval)","MM-d7","AB-d7","1/0/1",3.0,yes,7.00,7.00,7,7,7.00,7.00,1273150,643131,0.0315,0.0024
+"GROUP 4  -  Simple vs Phase-Aware eval  (fixed depth)","AB-d9-simple","AB-d9-phaseaware","1/0/1",-3.0,yes,9.00,9.00,9,9,9.00,9.00,598189,91686,0.0130,0.0718
+"GROUP 4  -  Simple vs Phase-Aware eval  (fixed depth)","AB-d11-simple","AB-d11-phaseaware","0/0/2",-6.0,no,11.00,11.00,11,11,11.00,11.00,605050,93977,0.0610,0.4962
+"GROUP 4  -  Simple vs Phase-Aware eval  (fixed depth)","AB-d13-simple","AB-d13-phaseaware","1/0/1",-1.0,yes,13.00,13.00,13,13,13.00,13.00,616288,91235,0.3213,2.3770
+"GROUP 5  -  Simple vs Phase-Aware eval  (time-limited)","AB-simple-0.1s","AB-phaseaware-0.1s","1/0/1",2.0,yes,10.00,8.50,10,7,13.00,11.00,619854,127174,0.0837,0.0808
+"GROUP 5  -  Simple vs Phase-Aware eval  (time-limited)","AB-simple-0.25s","AB-phaseaware-0.25s","2/0/0",17.0,no,11.00,9.00,11,8,13.00,10.00,614754,110531,0.2500,0.2322
+"GROUP 5  -  Simple vs Phase-Aware eval  (time-limited)","AB-simple-0.5s","AB-phaseaware-0.5s","1/0/1",-1.0,yes,12.00,10.00,11,9,13.25,11.50,629609,105180,0.4693,0.4342
+"GROUP 5  -  Simple vs Phase-Aware eval  (time-limited)","AB-simple-1s","AB-phaseaware-1s","1/0/1",1.0,yes,13.00,11.00,12,10,16.50,12.00,640324,116317,0.8204,0.7779
+"GROUP 5  -  Simple vs Phase-Aware eval  (time-limited)","AB-simple-2s","AB-phaseaware-2s","1/0/1",2.0,yes,14.00,11.00,13,11,17.00,13.00,636998,106097,1.5691,1.5337
+"GROUP 6  -  Minimax vs Alpha-Beta  (time-limited, same eval)","MM-simple-0.1s","AB-simple-0.1s","1/0/1",-9.0,yes,7.00,10.00,7,9,8.50,11.00,1233118,607859,0.0968,0.0957
+"GROUP 6  -  Minimax vs Alpha-Beta  (time-limited, same eval)","MM-simple-0.5s","AB-simple-0.5s","0/0/2",-19.0,no,8.00,12.00,8,12,9.00,13.00,1232231,603714,0.4630,0.4900
+"GROUP 6  -  Minimax vs Alpha-Beta  (time-limited, same eval)","MM-simple-1s","AB-simple-1s","1/0/1",-7.0,yes,9.00,13.00,9,12,9.00,15.00,1234797,612664,0.9050,0.8796
+"GROUP 6  -  Minimax vs Alpha-Beta  (time-limited, same eval)","MM-phaseaware-1s","AB-phaseaware-1s","1/0/1",-4.0,yes,7.50,11.00,7,11,9.00,12.00,322475,109979,0.8954,0.8569
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-simple-0.05s","AB-simple-0.25s","1/0/1",-5.0,yes,10.00,11.00,9,11,13.00,15.00,619186,619920,0.0447,0.1893
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-simple-0.25s","AB-simple-0.5s","1/0/1",8.0,yes,11.00,12.00,11,12,12.00,13.00,610760,611386,0.2315,0.4750
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-simple-0.25s","AB-simple-1s","1/0/1",-4.0,yes,11.00,12.00,11,12,12.00,14.00,595227,607107,0.2386,0.9583
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-simple-0.5s","AB-simple-1s","1/0/1",-9.0,yes,12.00,14.00,12,12,17.00,17.50,614302,619264,0.4008,0.9188
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-simple-1s","AB-simple-2s","1/0/1",-7.0,yes,13.00,14.00,13,14,15.00,15.00,634532,626854,0.8872,1.7633
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-pa-0.05s","AB-pa-0.25s","1/0/1",-4.0,yes,7.00,9.00,7,9,9.50,10.00,115795,118013,0.0477,0.2316
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-pa-0.25s","AB-pa-0.5s","1/0/1",-15.0,yes,9.00,10.00,8,9,10.00,11.00,94720,98652,0.2339,0.4718
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-pa-0.25s","AB-pa-1s","1/0/1",1.0,yes,9.00,10.00,9,10,10.00,12.00,99268,100686,0.2422,0.9706
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-pa-0.5s","AB-pa-1s","1/0/1",2.0,yes,10.00,11.00,10,10,12.00,13.00,109067,112776,0.3960,0.7590
+"GROUP 7  -  Time-limit scaling  (Alpha-Beta)","AB-pa-1s","AB-pa-2s","1/0/1",-2.0,yes,11.00,12.00,11,12,14.50,15.00,124816,129282,0.9500,1.9112
+"GROUP 8  -  Best Configurations Head-to-Head","MM-1s-simple","AB-1s-simple","1/0/1",-7.0,yes,9.00,13.00,9,12,9.00,15.00,1229533,607720,0.9050,0.8796
+"GROUP 8  -  Best Configurations Head-to-Head","AB-1s-simple","AB-1s-phaseaware","1/0/1",1.0,yes,13.00,11.00,12,10,16.50,12.00,640225,116143,0.8204,0.7779
+"GROUP 8  -  Best Configurations Head-to-Head","AB-d11-simple","AB-d11-phaseaware","0/0/2",-6.0,no,11.00,11.00,11,11,11.00,11.00,602590,92819,0.0613,0.5024

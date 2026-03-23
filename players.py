@@ -8,23 +8,31 @@ Each player function takes the board and player_id, and returns a tuple:
 
 import random
 from kalah_engine import get_valid_moves
-from ai import get_ai_move_minimax, get_ai_move_alphabeta
+from AI import get_ai_move_minimax, get_ai_move_alphabeta
 
 def create_human_player():
     """Factory for a human CLI player."""
     def player(board, player_id):
         valid_moves = get_valid_moves(board, player=player_id)
+
         while True:
             try:
                 user_input = int(input(f"Player {player_id}, choose a pit (1-6): "))
-                pit = (user_input - 1) if player_id == 1 else (user_input + 6)
-                
-                if pit in valid_moves:
-                    return pit, {} # Return empty stats for humans
-                else:
-                    print("Invalid move: Pit is empty or out of range. Try again.")
             except ValueError:
                 print("Please enter a valid numeric value.")
+                continue
+
+            if user_input < 1 or user_input > 6:
+                print("Please enter a number from 1 to 6.")
+                continue
+
+            pit = (user_input - 1) if player_id == 1 else (user_input + 6)
+
+            if pit in valid_moves:
+                return pit, {}  # Return empty stats for humans
+            else:
+                print("Invalid move: Pit is empty or out of range. Try again.\n")
+
     return player
 
 def create_random_ai_player():

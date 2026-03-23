@@ -14,14 +14,15 @@ def display_board(board):
     Args:
         board (list of int): A 14-element list representing the current board state.
     """
-    print("\n" + "="*40)
+    print("\n" + "=" * 40)
+    print("        (6) (5) (4) (3) (2) (1)")
     print("               Player 2")
     print(f"       [{board[12]:2}][{board[11]:2}][{board[10]:2}][{board[9]:2}][{board[8]:2}][{board[7]:2}]")
     print(f"  [{board[13]:2}]                                [{board[6]:2}]")
     print(f"       [{board[0]:2}][{board[1]:2}][{board[2]:2}][{board[3]:2}][{board[4]:2}][{board[5]:2}]")
-    print("               Player 1")
+    print("               Player 1")    
     print("        (1) (2) (3) (4) (5) (6)")
-    print("="*40 + "\n")
+    print("=" * 40 + "\n")
 
 
 def get_valid_moves(board, player):

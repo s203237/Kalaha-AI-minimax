@@ -150,6 +150,20 @@ def evaluate_board(board, ai_player_id, eval_mode="simple"):
     return evaluate_board_simple(board, ai_player_id)
 
 
+def _ordered_children(board, possible_moves, current_player, ai_player_id, eval_mode, is_maximizing):
+    """Precompute and order child positions to improve Alpha-Beta pruning."""
+    children = []
+
+    for move in possible_moves:
+        board_copy = board.copy()
+        new_board, extra_turn = make_move(board_copy, player=current_player, pit=move, verbose=False)
+        eval_hint = evaluate_board(new_board, ai_player_id, eval_mode=eval_mode)
+        children.append((move, new_board, extra_turn, eval_hint))
+
+    children.sort(key=lambda child: child[3], reverse=is_maximizing)
+    return children
+
+
 def get_ai_move_minimax(board, ai_player_id, depth=None, time_limit=None, eval_mode="simple"):
     """
     Wrapper function to initiate the Minimax search.
@@ -413,9 +427,11 @@ def alphabeta(board, depth, is_maximizing, ai_player_id, alpha, beta, stats, sta
         if not possible_moves:
             return evaluate_board(board_for_check, ai_player_id, eval_mode=eval_mode), None
 
-        for move in possible_moves:
-            board_copy = board.copy()
-            new_board, extra_turn = make_move(board_copy, player=current_player, pit=move, verbose=False)
+        ordered_children = _ordered_children(
+            board, possible_moves, current_player, ai_player_id, eval_mode, is_maximizing=True
+        )
+
+        for move, new_board, extra_turn, _ in ordered_children:
 
             # Kalah rule: If an extra turn is granted, the turn does NOT switch
             next_is_maximizing = True if extra_turn else False
@@ -443,9 +459,11 @@ def alphabeta(board, depth, is_maximizing, ai_player_id, alpha, beta, stats, sta
         if not possible_moves:
             return evaluate_board(board_for_check, ai_player_id, eval_mode=eval_mode), None
 
-        for move in possible_moves:
-            board_copy = board.copy()
-            new_board, extra_turn = make_move(board_copy, player=current_player, pit=move, verbose=False)
+        ordered_children = _ordered_children(
+            board, possible_moves, current_player, ai_player_id, eval_mode, is_maximizing=False
+        )
+
+        for move, new_board, extra_turn, _ in ordered_children:
 
             # Kalah rule: If an extra turn is granted, the turn does NOT switch
             next_is_maximizing = False if extra_turn else True
